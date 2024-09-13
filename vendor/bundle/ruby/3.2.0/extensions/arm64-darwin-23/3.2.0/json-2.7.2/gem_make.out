@@ -1,0 +1,16 @@
+current directory: /Users/thuc.nguyen/Desktop/TodoApp/TodoApp/vendor/bundle/ruby/3.2.0/gems/json-2.7.2/ext/json
+/opt/homebrew/opt/ruby/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/thuc.nguyen/Desktop/TodoApp/TodoApp/vendor/bundle/ruby/3.2.0/gems/json-2.7.2/ext/json
+make DESTDIR\= sitearchdir\=./.gem.20240913-81509-hta4w2 sitelibdir\=./.gem.20240913-81509-hta4w2 clean
+
+current directory: /Users/thuc.nguyen/Desktop/TodoApp/TodoApp/vendor/bundle/ruby/3.2.0/gems/json-2.7.2/ext/json
+make DESTDIR\= sitearchdir\=./.gem.20240913-81509-hta4w2 sitelibdir\=./.gem.20240913-81509-hta4w2
+make: Nothing to be done for `all'.
+
+current directory: /Users/thuc.nguyen/Desktop/TodoApp/TodoApp/vendor/bundle/ruby/3.2.0/gems/json-2.7.2/ext/json
+make DESTDIR\= sitearchdir\=./.gem.20240913-81509-hta4w2 sitelibdir\=./.gem.20240913-81509-hta4w2 install
+
+current directory: /Users/thuc.nguyen/Desktop/TodoApp/TodoApp/vendor/bundle/ruby/3.2.0/gems/json-2.7.2/ext/json
+make DESTDIR\= sitearchdir\=./.gem.20240913-81509-hta4w2 sitelibdir\=./.gem.20240913-81509-hta4w2 clean
