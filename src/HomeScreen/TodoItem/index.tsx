@@ -1,28 +1,64 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Text, View, StyleSheet, TouchableOpacity, Image} from 'react-native';
 import {TodoItem} from '../../Store';
 
 const iconCheck = require('../../Assets/images/icon_check.png');
-const iconRedFlag = require('../../Assets/images/icon_red_flag.png');
 const iconDelete = require('../../Assets/images/icon_delete.png');
-const iconBlackFlag = require('../../Assets/images/icon_black_flag.png');
+
+const iconRedStar = require('../../Assets/images/icon_red.png');
+const iconGreenStar = require('../../Assets/images/icon_green.png');
+const iconOrangeStar = require('../../Assets/images/icon_orange.png');
+const iconYellowStar = require('../../Assets/images/icon_yellow.png');
+const iconStar = require('../../Assets/images/icon_star.png');
 
 const TodoItemView = ({
   item,
   onMarkAscomplete,
   onDeleteItem,
   onSelectItem,
-  onSetRedFlagTodo,
 }: {
   item: TodoItem;
   onMarkAscomplete: (item: TodoItem) => void;
   onDeleteItem: (item: TodoItem) => void;
   onSelectItem: (item: TodoItem) => void;
-  onSetRedFlagTodo: (item: TodoItem) => void;
 }) => {
   const [year, month, day] = item.expireDate.split('-').map(Number);
   const targetDate = new Date(year, month - 1, day);
   const currentDate = new Date();
+
+  const getIcon = () => {
+    switch (item.icon) {
+      case 'all':
+        return null;
+      case 'red':
+        return iconRedStar;
+      case 'none':
+        return iconGreenStar;
+      case 'yellow':
+        return iconYellowStar;
+      case 'orange':
+        return iconOrangeStar;
+      default:
+        return null;
+    }
+  };
+
+  const formatDate = (formatDateTime: Date) => {
+    const newDate = new Date(formatDateTime);
+
+    const formattedTime = newDate.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    const formattedDate = newDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    return `${formattedTime} ${formattedDate}`;
+  };
 
   return (
     <View style={styles.container}>
@@ -64,17 +100,12 @@ const TodoItemView = ({
                   !item.isSelected &&
                   styles.expiryType,
               ]}>
-              {`Expiry Date: ${item.expireDate}`}
+              {`Due time: ${formatDate(new Date(item.expireDate))}`}
             </Text>
           )}
         </View>
 
-        <View
-          style={{
-            justifyContent: 'center',
-            marginLeft: 'auto',
-            flexDirection: 'row',
-          }}>
+        <View style={styles.rightViewContainer}>
           <TouchableOpacity
             style={{
               justifyContent: 'center',
@@ -82,13 +113,10 @@ const TodoItemView = ({
               paddingRight: 20,
             }}
             hitSlop={{left: 20}}
-            onPress={() => {
-              onSetRedFlagTodo(item);
-            }}>
-            <Image
-              source={item.isRedFlag ? iconRedFlag : iconBlackFlag}
-              style={styles.iconDelete}
-            />
+            onPress={() => {}}>
+            {getIcon() && (
+              <Image source={getIcon()} style={styles.iconDelete} />
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -107,10 +135,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     borderRadius: 10,
-    height: 60,
+    minHeight: 60,
     backgroundColor: 'white',
     marginHorizontal: 20,
     marginTop: 10,
+    paddingVertical: 10,
   },
   contentView: {
     flex: 1,
@@ -134,7 +163,7 @@ const styles = StyleSheet.create({
   },
   icon: {width: 14, height: 14},
   iconDelete: {width: 20, height: 20},
-  textContainer: {justifyContent: 'center', marginLeft: 20},
+  textContainer: {justifyContent: 'center', marginLeft: 20, maxWidth: '70%', marginRight: 20},
   textTitleDone: {
     textDecorationLine: 'line-through',
     color: 'gray',
@@ -147,6 +176,12 @@ const styles = StyleSheet.create({
   },
   textDesc: {
     fontSize: 12,
+    color: '#787878',
+  },
+  rightViewContainer: {
+    justifyContent: 'center',
+    marginLeft: 'auto',
+    flexDirection: 'row',
   },
 });
 

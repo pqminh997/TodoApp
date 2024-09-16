@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {createSlice, configureStore, PayloadAction} from '@reduxjs/toolkit';
 
+
 export interface TodoItem {
   id: string;
   title: string;
@@ -8,7 +9,7 @@ export interface TodoItem {
   createDate: number;
   expireDate: string;
   isSelected: boolean;
-  isRedFlag: boolean;
+  icon: 'red' | 'yellow' | 'none' | 'orange' | 'all';
 }
 
 export interface TodoState {
@@ -21,7 +22,6 @@ export const loadTodos = async (): Promise<TodoItem[]> => {
   try {
     const todosJson = await AsyncStorage.getItem(TODOS_KEY);
     if (todosJson) {
-      console.log('todosJson', todosJson);
       return JSON.parse(todosJson);
     }
     return [];
@@ -60,13 +60,15 @@ const todoSlice = createSlice({
       saveTodos(state.todos);
     },
     editTodo: (state, action: PayloadAction<TodoItem>) => {
-      const {id, title, desc, expireDate} = action.payload;
+      const {id, title, desc, expireDate, icon} = action.payload;
       const todo = state.todos.find(item => item.id === id);
       if (todo) {
         todo.title = title;
         todo.desc = desc;
         todo.expireDate = expireDate;
+        todo.icon = icon;
       }
+      console.log('icon>>', icon);
       saveTodos(state.todos);
     },
     markAsCompleteTodo: (state, action: PayloadAction<TodoItem>) => {
@@ -76,18 +78,16 @@ const todoSlice = createSlice({
       }
       saveTodos(state.todos);
     },
-    setRedFlagTodo: (state, action: PayloadAction<TodoItem>) => {
-      const todo = state.todos.find(item => item.id === action.payload.id);
-      if (todo) {
-        todo.isRedFlag = !todo.isRedFlag;
-      }
-      saveTodos(state.todos);
-    },
   },
 });
 
-export const {addTodo, markAsCompleteTodo, deleteTodo, editTodo, setTodos, setRedFlagTodo} =
-  todoSlice.actions;
+export const {
+  addTodo,
+  markAsCompleteTodo,
+  deleteTodo,
+  editTodo,
+  setTodos,
+} = todoSlice.actions;
 
 const store = configureStore({
   reducer: todoSlice.reducer,

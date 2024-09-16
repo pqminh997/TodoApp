@@ -6,6 +6,8 @@ import {
   Image,
   TouchableOpacity,
   InputAccessoryView,
+  Text,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import TodoItemView from './TodoItem';
 import {
@@ -13,16 +15,15 @@ import {
   deleteTodo,
   editTodo,
   markAsCompleteTodo,
-  setRedFlagTodo,
   TodoItem,
 } from '../Store';
 import {useAppDispatch, useAppSelector} from '../Store/hook';
 import AddTodoView from '../Components/AddTodoView';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import FilterItemView, {ColorItem} from './FilterItemView';
 
 const iconAdd = require('../Assets/images/icon_add.png');
-const iconRedFlag = require('../Assets/images/icon_red_flag.png');
-const iconBlackFlag = require('../Assets/images/icon_black_flag.png');
+const iconArrowDown = require('../Assets/images/icon_arrow_down.png');
 
 const HomeScreen = () => {
   const todos = useAppSelector(state => state.todos);
@@ -30,8 +31,11 @@ const HomeScreen = () => {
 
   const [isShowAddTodoView, setIsShowAddTodoView] = useState(false);
   const [currentItem, setCurrentItem] = useState<TodoItem | null>(null);
-  const [isRedFlag, setIsRedFlag] = useState(false);
-  // const [currentTodos, setCurrentTodos] = useState<TodoItem[]>([]);
+  const [showFilterView, setShowFilterView] = useState(false);
+  const [filterViewY, setFilterViewY] = useState(0);
+  const [filter, setFilter] = useState<
+    'red' | 'yellow' | 'none' | 'orange' | 'all'
+  >('all');
 
   const onMarkAscompleteItem = (selectedItem: TodoItem) => {
     dispatch(markAsCompleteTodo(selectedItem));
@@ -40,10 +44,6 @@ const HomeScreen = () => {
   const showAddTodoView = () => {
     setCurrentItem(null);
     setIsShowAddTodoView(true);
-  };
-
-  const handleFilterRedFlag = () => {
-    setIsRedFlag(!isRedFlag);
   };
 
   const onCompleteAddTodo = (item: TodoItem) => {
@@ -69,69 +69,89 @@ const HomeScreen = () => {
     setIsShowAddTodoView(true);
   };
 
-  const onSetRedFlagTodo = (selectedItem: TodoItem) => {
-    dispatch(setRedFlagTodo(selectedItem));
+  const handleButtonPress = () => {
+    setShowFilterView(!showFilterView);
+  };
+
+  const handlePressOutside = () => {
+    setShowFilterView(false);
+  };
+
+  const onPressFilterItem = (item: ColorItem) => {
+    setShowFilterView(false);
+    setFilter(item.name);
   };
 
   return (
     <View style={{flex: 1}}>
       <SafeAreaView style={styles.safeArena}>
-        <View style={styles.container}>
-          <FlatList
-            data={todos}
-            renderItem={({item}) => {
-              if (isRedFlag && item.isRedFlag) {
-                return (
-                  <TodoItemView
-                    item={item}
-                    onMarkAscomplete={onMarkAscompleteItem}
-                    onDeleteItem={onDeleteItem}
-                    onSelectItem={onSelectItem}
-                    onSetRedFlagTodo={onSetRedFlagTodo}
-                  />
-                );
-              } else if (isRedFlag === false) {
-                return (
-                  <TodoItemView
-                    item={item}
-                    onMarkAscomplete={onMarkAscompleteItem}
-                    onDeleteItem={onDeleteItem}
-                    onSelectItem={onSelectItem}
-                    onSetRedFlagTodo={onSetRedFlagTodo}
-                  />
-                );
-              } else {
-                return <View style={{padding: 0, height: 0}} />;
-              }
-            }}
-            extraData={todos}
-            keyExtractor={item => item.id}
-            // ItemSeparatorComponent={() => <View style={{height: 10}} />}
-          />
+        <TouchableWithoutFeedback onPress={handlePressOutside}>
+          <View style={styles.container}>
+            <View
+              style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingVertical: 5,
+              }}>
+              <TouchableOpacity
+                onLayout={event =>
+                  setFilterViewY(
+                    event.nativeEvent.layout.y +
+                      event.nativeEvent.layout.height,
+                  )
+                }
+                onPress={handleButtonPress}
+                style={{flexDirection: 'row'}}
+                hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                <Text style={{fontSize: 16, fontWeight: '500'}}>All</Text>
+                <Image
+                  source={iconArrowDown}
+                  style={{width: 18, height: 18, marginLeft: 4}}
+                />
+              </TouchableOpacity>
+            </View>
 
-          <TouchableOpacity
-            style={[styles.addView, styles.redFlagView]}
-            onPress={handleFilterRedFlag}>
-            <Image
-              source={isRedFlag ? iconRedFlag : iconBlackFlag}
-              style={{width: 24, height: 24}}
+            <FlatList
+              data={todos}
+              renderItem={({item}) => {
+                if (item.icon === filter || filter === 'all') {
+                  return (
+                    <TodoItemView
+                      item={item}
+                      onMarkAscomplete={onMarkAscompleteItem}
+                      onDeleteItem={onDeleteItem}
+                      onSelectItem={onSelectItem}
+                    />
+                  );
+                } else {
+                  return <View />;
+                }
+              }}
+              extraData={todos}
+              keyExtractor={item => item.id}
+              pointerEvents={showFilterView ? 'none' : 'auto'}
             />
-          </TouchableOpacity>
 
-          <TouchableOpacity style={styles.addView} onPress={showAddTodoView}>
-            <Image source={iconAdd} style={{width: 24, height: 24}} />
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.addView} onPress={showAddTodoView}>
+              <Image source={iconAdd} style={{width: 24, height: 24}} />
+            </TouchableOpacity>
 
-          <InputAccessoryView>
-            {isShowAddTodoView && (
-              <AddTodoView
-                onComplete={onCompleteAddTodo}
-                currentItem={currentItem}
-                onEditItem={onEditItem}
-              />
+            <InputAccessoryView>
+              {isShowAddTodoView && (
+                <AddTodoView
+                  onComplete={onCompleteAddTodo}
+                  currentItem={currentItem}
+                  onEditItem={onEditItem}
+                />
+              )}
+            </InputAccessoryView>
+            {showFilterView && (
+              <View style={[styles.filterView, {top: filterViewY}]}>
+                <FilterItemView onPressItem={onPressFilterItem} isFilterType={true}/>
+              </View>
             )}
-          </InputAccessoryView>
-        </View>
+          </View>
+        </TouchableWithoutFeedback>
       </SafeAreaView>
       {isShowAddTodoView && <View style={styles.blackTheme} />}
     </View>
@@ -169,6 +189,10 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: 'black',
     opacity: 0.5,
+  },
+  filterView: {
+    position: 'absolute',
+    alignSelf: 'center',
   },
 });
 
