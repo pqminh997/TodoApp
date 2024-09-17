@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {createSlice, configureStore, PayloadAction} from '@reduxjs/toolkit';
-
+import {IconType} from '../Utils/Types';
+import {pushLocalNotificationSchedule} from '../Utils/NotiServices';
 
 export interface TodoItem {
   id: string;
@@ -9,7 +10,7 @@ export interface TodoItem {
   createDate: number;
   expireDate: string;
   isSelected: boolean;
-  icon: 'red' | 'yellow' | 'none' | 'orange' | 'all';
+  icon: IconType;
 }
 
 export interface TodoState {
@@ -54,6 +55,14 @@ const todoSlice = createSlice({
     addTodo: (state, action: PayloadAction<TodoItem>) => {
       state.todos.push(action.payload);
       saveTodos(state.todos);
+
+      const expiryDate = new Date(action.payload.expireDate).getTime();
+      const currentDate = Date.now();
+      if (expiryDate > currentDate) {
+        const time = expiryDate - currentDate;
+        pushLocalNotificationSchedule(time, action.payload.title);
+      }
+      console.log('todos>', state.todos);
     },
     deleteTodo: (state, action: PayloadAction<TodoItem>) => {
       state.todos = state.todos.filter(todo => todo.id !== action.payload.id);
@@ -68,7 +77,6 @@ const todoSlice = createSlice({
         todo.expireDate = expireDate;
         todo.icon = icon;
       }
-      console.log('icon>>', icon);
       saveTodos(state.todos);
     },
     markAsCompleteTodo: (state, action: PayloadAction<TodoItem>) => {
@@ -81,13 +89,8 @@ const todoSlice = createSlice({
   },
 });
 
-export const {
-  addTodo,
-  markAsCompleteTodo,
-  deleteTodo,
-  editTodo,
-  setTodos,
-} = todoSlice.actions;
+export const {addTodo, markAsCompleteTodo, deleteTodo, editTodo, setTodos} =
+  todoSlice.actions;
 
 const store = configureStore({
   reducer: todoSlice.reducer,

@@ -12,6 +12,8 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {Provider} from 'react-redux';
 import store, {loadTodos, setTodos} from './src/Store';
 import {useAppDispatch} from './src/Store/hook';
+import { configNoti } from './src/Utils/NotiServices';
+
 
 const App = () => {
   return (
@@ -25,7 +27,7 @@ const App = () => {
 
 const RootComponent = () => {
   const dispatch = useAppDispatch();
-
+  configNoti();
   useEffect(() => {
     const fetchTodos = async () => {
       const getTodos = await loadTodos();

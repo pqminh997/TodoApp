@@ -1,47 +1,20 @@
 import React, {useState} from 'react';
 import {Text, View, StyleSheet, TouchableOpacity, Image} from 'react-native';
 import {TodoItem} from '../../Store';
+import {getIcon} from '../../Utils/Util';
 
 const iconCheck = require('../../Assets/images/icon_check.png');
 const iconDelete = require('../../Assets/images/icon_delete.png');
 
-const iconRedStar = require('../../Assets/images/icon_red.png');
-const iconGreenStar = require('../../Assets/images/icon_green.png');
-const iconOrangeStar = require('../../Assets/images/icon_orange.png');
-const iconYellowStar = require('../../Assets/images/icon_yellow.png');
-const iconStar = require('../../Assets/images/icon_star.png');
-
 const TodoItemView = ({
   item,
-  onMarkAscomplete,
-  onDeleteItem,
   onSelectItem,
 }: {
   item: TodoItem;
-  onMarkAscomplete: (item: TodoItem) => void;
-  onDeleteItem: (item: TodoItem) => void;
   onSelectItem: (item: TodoItem) => void;
 }) => {
-  const [year, month, day] = item.expireDate.split('-').map(Number);
-  const targetDate = new Date(year, month - 1, day);
-  const currentDate = new Date();
-
-  const getIcon = () => {
-    switch (item.icon) {
-      case 'all':
-        return null;
-      case 'red':
-        return iconRedStar;
-      case 'none':
-        return iconGreenStar;
-      case 'yellow':
-        return iconYellowStar;
-      case 'orange':
-        return iconOrangeStar;
-      default:
-        return null;
-    }
-  };
+  const expireDate = new Date(item.expireDate).getTime();
+  const currentDate = new Date().getTime();
 
   const formatDate = (formatDateTime: Date) => {
     const newDate = new Date(formatDateTime);
@@ -65,19 +38,6 @@ const TodoItemView = ({
       <TouchableOpacity
         style={[styles.contentView]}
         onPress={() => onSelectItem(item)}>
-        <TouchableOpacity
-          style={{justifyContent: 'center'}}
-          hitSlop={{left: 20, right: 20}}
-          onPress={() => onMarkAscomplete(item)}>
-          {item.isSelected ? (
-            <View style={[styles.checkBox, styles.checkDone]}>
-              <Image source={iconCheck} style={styles.icon} />
-            </View>
-          ) : (
-            <View style={styles.checkBox} />
-          )}
-        </TouchableOpacity>
-
         <View style={styles.textContainer}>
           <Text
             style={[styles.textTitle, item.isSelected && styles.textTitleDone]}>
@@ -86,6 +46,7 @@ const TodoItemView = ({
 
           {item.desc && (
             <Text
+              numberOfLines={2}
               style={[styles.textDesc, item.isSelected && styles.textDescDone]}>
               {item.desc}
             </Text>
@@ -94,9 +55,9 @@ const TodoItemView = ({
           {item.expireDate && (
             <Text
               style={[
-                styles.textDesc,
+                styles.textDueTime,
                 item.isSelected && styles.textDescDone,
-                currentDate > targetDate &&
+                currentDate > expireDate &&
                   !item.isSelected &&
                   styles.expiryType,
               ]}>
@@ -106,25 +67,9 @@ const TodoItemView = ({
         </View>
 
         <View style={styles.rightViewContainer}>
-          <TouchableOpacity
-            style={{
-              justifyContent: 'center',
-              marginLeft: 'auto',
-              paddingRight: 20,
-            }}
-            hitSlop={{left: 20}}
-            onPress={() => {}}>
-            {getIcon() && (
-              <Image source={getIcon()} style={styles.iconDelete} />
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            hitSlop={{right: 20}}
-            style={{justifyContent: 'center', marginLeft: 'auto'}}
-            onPress={() => onDeleteItem(item)}>
-            <Image source={iconDelete} style={styles.iconDelete} />
-          </TouchableOpacity>
+          {getIcon(item.icon) && (
+            <Image source={getIcon(item.icon)} style={styles.iconDelete} />
+          )}
         </View>
       </TouchableOpacity>
     </View>
@@ -139,12 +84,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginHorizontal: 20,
     marginTop: 10,
-    paddingVertical: 10,
   },
   contentView: {
     flex: 1,
     paddingHorizontal: 20,
     flexDirection: 'row',
+    paddingVertical: 10,
   },
   expiryType: {
     backgroundColor: '#fadbd8',
@@ -163,7 +108,11 @@ const styles = StyleSheet.create({
   },
   icon: {width: 14, height: 14},
   iconDelete: {width: 20, height: 20},
-  textContainer: {justifyContent: 'center', marginLeft: 20, maxWidth: '70%', marginRight: 20},
+  textContainer: {
+    justifyContent: 'center',
+    maxWidth: '90%',
+    marginRight: 20,
+  },
   textTitleDone: {
     textDecorationLine: 'line-through',
     color: 'gray',
@@ -178,10 +127,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#787878',
   },
+  textDueTime: {
+    marginTop: 6,
+    fontSize: 12,
+    color: '#787878',
+  },
   rightViewContainer: {
     justifyContent: 'center',
     marginLeft: 'auto',
     flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 

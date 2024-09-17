@@ -7,7 +7,10 @@ import {
   FlatList,
   Dimensions,
   TouchableOpacity,
+  Pressable,
 } from 'react-native';
+import {IconType} from '../../Utils/Types';
+import { convertText } from '../../Utils/Util';
 
 const iconRedStar = require('../../Assets/images/icon_red.png');
 const iconGreenStar = require('../../Assets/images/icon_green.png');
@@ -17,7 +20,7 @@ const iconStar = require('../../Assets/images/icon_star.png');
 const iconAll = require('../../Assets/images/icon_all.png');
 
 export interface ColorItem {
-  name: 'red' | 'yellow' | 'none' | 'orange' | 'all';
+  name: IconType;
   image: any;
 }
 
@@ -34,14 +37,15 @@ const FilterItemView = ({
   isFilterType = false,
 }: {
   onPressItem: (item: ColorItem) => void;
-  isFilterType: boolean;
+  isFilterType?: boolean;
 }) => {
   return (
     <View style={styles.container}>
       <FlatList
+        keyboardShouldPersistTaps="always"
         data={colors}
         renderItem={({item, index}) => {
-          if (isFilterType) {
+          if (isFilterType || (!isFilterType && index !== 0)) {
             return (
               <ColorItemComponent
                 item={item}
@@ -51,18 +55,7 @@ const FilterItemView = ({
               />
             );
           } else {
-            if (index !== 0) {
-              return (
-                <ColorItemComponent
-                  item={item}
-                  index={index}
-                  onPress={onPressItem}
-                  isFilterType={isFilterType}
-                />
-              );
-            } else {
-              return <View />;
-            }
+            return <View />;
           }
         }}
         keyExtractor={item => item.name}
@@ -77,34 +70,14 @@ const ColorItemComponent = ({
   item,
   index,
   onPress,
-  isFilterType,
 }: {
   item: ColorItem;
   index: number;
   onPress: (item: ColorItem) => void;
-  isFilterType: boolean;
 }) => {
-  // const [text, setText] = useState<string>('all');
-
-  const convertText = () => {
-    switch (item.name) {
-      case 'all':
-        return 'All';
-      case 'none':
-        return 'None';
-      case 'red':
-        return 'High';
-      case 'yellow':
-        return 'Low';
-      case 'orange':
-        return 'Medium';
-      default:
-        return 'None';
-    }
-  };
 
   return (
-    <TouchableOpacity
+    <Pressable
       style={[
         styles.colorItemBtn,
         index === colors.length - 1 && {paddingBottom: 10},
@@ -114,8 +87,8 @@ const ColorItemComponent = ({
         source={item.image}
         style={{width: 18, height: 18, marginRight: 20}}
       />
-      <Text>{convertText()}</Text>
-    </TouchableOpacity>
+      <Text>{convertText(item.name)}</Text>
+    </Pressable>
   );
 };
 

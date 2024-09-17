@@ -6,47 +6,47 @@ import {
   Image,
   TextInput,
   Text,
+  Alert,
 } from 'react-native';
-import {Calendar} from 'react-native-calendars';
 import 'react-native-get-random-values';
 import {v4 as uuidv4} from 'uuid';
-import {TodoIcon, TodoItem} from '../Store';
+import {TodoItem} from '../Store';
 import FilterItemView, {ColorItem} from '../HomeScreen/FilterItemView';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import {IconType} from '../Utils/Types';
+import {getIcon} from '../Utils/Util';
 
 const iconAdd = require('../Assets/images/icon_add.png');
 const iconClock = require('../Assets/images/icon_clock.png');
-const iconClose = require('../Assets/images/icon_close.png');
-
-const iconRedStar = require('../Assets/images/icon_red.png');
-const iconGreenStar = require('../Assets/images/icon_green.png');
-const iconOrangeStar = require('../Assets/images/icon_orange.png');
-const iconYellowStar = require('../Assets/images/icon_yellow.png');
-const iconStar = require('../Assets/images/icon_star.png');
+const iconDelete = require('../Assets/images/icon_delete.png');
+const iconCheck = require('../Assets/images/icon_check.png');
+const iconUnCheck = require('../Assets/images/icon_un_check.png');
 
 const AddTodoView = ({
   onComplete,
   currentItem,
   onEditItem,
+  onDeleteItem,
+  onMarkAscomplete,
 }: {
   onComplete: (item: TodoItem) => void;
   currentItem?: TodoItem | null;
   onEditItem: (item: TodoItem) => void;
+  onDeleteItem: (item: TodoItem) => void;
+  onMarkAscomplete: (item: TodoItem) => void;
 }) => {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [dueTime, setDueTime] = useState<string | null>('');
-  const [currentIcon, setCurrentIcon] = useState<
-    'red' | 'yellow' | 'none' | 'orange' | 'all'
-  >('all');
+  const [currentIcon, setCurrentIcon] = useState<IconType>('none');
   const [filterViewY, setFilterViewY] = useState(0);
-  const [filterViewX, setFilterViewX] = useState(0);
   const inputRef = useRef<TextInput>(null);
   const [showFilterView, setShowFilterView] = useState(false);
   const [time, setTime] = useState<Date>(new Date());
   const [date, setDate] = useState<Date>(new Date());
 
   const [isShowDueTime, setIsShowDueTime] = useState(false);
+  const [isDone, setIsDone] = useState(false);
 
   const addNewTodo = () => {
     const newTodo: TodoItem = {
@@ -75,39 +75,57 @@ const AddTodoView = ({
   };
 
   const onPressFilterItem = (item: ColorItem) => {
+    console.log('awdawd');
     setShowFilterView(false);
     setCurrentIcon(item.name);
   };
 
-  const getIcon = () => {
-    switch (currentIcon) {
-      case 'all':
-        return iconStar;
-      case 'red':
-        return iconRedStar;
-      case 'none':
-        return iconGreenStar;
-      case 'yellow':
-        return iconYellowStar;
-      case 'orange':
-        return iconOrangeStar;
-      default:
-        return iconStar;
-    }
+  const onShowAlert = () => {
+    Alert.alert(
+      'Are you sure remove the task?',
+      '',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'Confirm',
+          onPress: () => {
+            currentItem && onDeleteItem(currentItem);
+          },
+        },
+      ],
+      {cancelable: true},
+    );
   };
 
   useEffect(() => {
     if (currentItem) {
       setTitle(currentItem.title);
       setDesc(currentItem.desc);
-      setDueTime(currentItem.expireDate);
       setCurrentIcon(currentItem.icon);
-
+      setIsDone(currentItem.isSelected);
       if (currentItem.expireDate) {
         setIsShowDueTime(true);
+        setDueTime(currentItem.expireDate);
+        setTime(new Date(currentItem.expireDate));
+        setDate(new Date(currentItem.expireDate));
+      } else {
+        setDueTime(new Date().toString());
       }
+    } else {
+      setIsShowDueTime(false);
+      setDueTime(null);
     }
   }, [currentItem]);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -119,101 +137,126 @@ const AddTodoView = ({
             placeholder="Todo name"
             onChangeText={text => setTitle(text)}
             ref={inputRef}
+            autoCorrect={false}
+            textContentType={'none'}
+            autoComplete={'off'}
+            spellCheck={false}
+            placeholderTextColor={'gray'}
           />
 
           <TextInput
-            // numberOfLines={6}
+            autoCorrect={false}
             multiline={true}
-            style={{fontSize: 16, minHeight: 60, marginBottom: 0, color: '#787878'}}
+            style={{
+              fontSize: 16,
+              minHeight: 40,
+              marginBottom: 0,
+              color: '#787878',
+            }}
             value={desc}
             placeholder="Todo description"
             onChangeText={text => setDesc(text)}
+            spellCheck={false}
+            autoComplete={'off'}
+            placeholderTextColor={'gray'}
           />
 
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            {!isShowDueTime ? (
-              <TouchableOpacity onPress={() => setIsShowDueTime(true)}>
-                <Text
-                  style={{
-                    color: '#3498db',
-                    fontWeight: '500',
-                    paddingVertical: 10,
-                  }}>
-                  {'Set Due Time'}
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Text style={{fontSize: 18}}>{`Due time: `}</Text>
+          {isShowDueTime && (
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Text style={{fontSize: 18}}>{`Due time: `}</Text>
 
-                <DateTimePicker
-                  mode="time"
-                  value={time}
-                  onChange={(event, time) => {
-                    if (time) {
-                      setDueTime(time.toString());
-                      setTime(time);
-                    }
-                  }}
-                />
+              <DateTimePicker
+                mode="time"
+                value={time}
+                onChange={(event, time) => {
+                  if (time) {
+                    setDueTime(time.toString());
+                    setTime(time);
+                  }
+                }}
+              />
 
-                <DateTimePicker
-                  mode="date"
-                  value={date}
-                  onChange={(event, date) => {
-                    if (date) {
-                      setDate(date);
-                      setDueTime(time.toString());
-                    }
-                  }}
-                />
-                <TouchableOpacity
-                  style={{marginLeft: 20}}
-                  onPress={() => {
-                    setIsShowDueTime(false);
-                    setDueTime(null);
-                  }}>
-                  <Image source={iconClose} style={{width: 27, height: 27}} />
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
+              <DateTimePicker
+                mode="date"
+                value={date}
+                onChange={(event, date) => {
+                  if (date) {
+                    setDate(date);
+                    setDueTime(date.toString());
+                  }
+                }}
+              />
+            </View>
+          )}
         </View>
 
         <View style={{flexDirection: 'row-reverse', marginBottom: 10}}>
           <TouchableOpacity
-            hitSlop={{right: 20}}
-            style={styles.addView}
+            hitSlop={{right: 10}}
+            style={[styles.addView]}
             onPress={addNewTodo}>
-            <Image source={iconAdd} style={{width: 24, height: 24}} />
+            {/* <Image source={iconAdd} style={{width: 24, height: 24}} /> */}
+            <Text style={{fontSize: 24, color: '#3498db'}}>Save</Text>
           </TouchableOpacity>
-
-          {/* <TouchableOpacity
-            hitSlop={{right: 20}}
-            style={[styles.addView, styles.clockView]}
-            onPress={onShowCalendar}>
-            <Image source={iconClock} style={{width: 24, height: 24}} />
-          </TouchableOpacity> */}
 
           <TouchableOpacity
             onLayout={event => {
               setFilterViewY(
                 event.nativeEvent.layout.y + event.nativeEvent.layout.height,
               );
-              setFilterViewX(event.nativeEvent.layout.x);
             }}
-            hitSlop={{right: 20}}
+            hitSlop={{right: 10}}
             style={[styles.addView, styles.starView]}
             onPress={() => setShowFilterView(!showFilterView)}>
-            <Image source={getIcon()} style={{width: 24, height: 24}} />
+            <Image
+              source={getIcon(currentIcon, true)}
+              style={{width: 24, height: 24}}
+            />
           </TouchableOpacity>
+
+          <TouchableOpacity
+            hitSlop={{right: 10}}
+            style={[styles.addView, styles.clockView]}
+            onPress={() => {
+              setIsShowDueTime(!isShowDueTime);
+            }}>
+            <Image source={iconClock} style={{width: 24, height: 24}} />
+          </TouchableOpacity>
+
+          {currentItem && (
+            <TouchableOpacity
+              hitSlop={{left: 10, right: 5}}
+              style={{}}
+              onPress={() => {
+                currentItem && onMarkAscomplete(currentItem);
+                setIsDone(!isDone);
+              }}>
+              <Image
+                source={isDone ? iconCheck : iconUnCheck}
+                style={{width: 38, height: 38}}
+              />
+            </TouchableOpacity>
+          )}
+          {currentItem && <Text style={styles.deleteView}>|</Text>}
+
+          {currentItem && (
+            <TouchableOpacity
+              hitSlop={{right: 10}}
+              style={[styles.addView, styles.clockView]}
+              onPress={() => {
+                onShowAlert();
+              }}>
+              <Image source={iconDelete} style={{width: 24, height: 24}} />
+            </TouchableOpacity>
+          )}
         </View>
 
         {showFilterView && (
           <View
+            pointerEvents="auto"
             style={[
               styles.filterBottomView,
-              {left: filterViewX, bottom: filterViewY + 20},
+              {right: 0, bottom: filterViewY + 20},
             ]}>
             <FilterItemView onPressItem={onPressFilterItem} />
           </View>
@@ -229,18 +272,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   addView: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#3498db',
-    borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 20,
+    marginRight: 10,
   },
   clockView: {
+    width: 40,
+    height: 40,
     backgroundColor: 'white',
   },
   starView: {
+    width: 40,
+    height: 40,
     backgroundColor: 'white',
   },
   filterView: {
@@ -250,6 +293,14 @@ const styles = StyleSheet.create({
   filterBottomView: {
     position: 'absolute',
     alignSelf: 'center',
+  },
+  deleteView: {
+    fontSize: 30,
+    color: 'gray',
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 24,
   },
 });
 

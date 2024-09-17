@@ -1,0 +1,1 @@
+export type IconType = 'red' | 'yellow' | 'none' | 'orange' | 'all';
