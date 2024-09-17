@@ -118,7 +118,7 @@ const HomeScreen = () => {
 
   const isMatchDate = (item: TodoItem) => {
     if (selectedFilterDate) {
-      const createDate = getDateWithoutTime(new Date(item.createDate));
+      const createDate = getDateWithoutTime(new Date(item.expireDate));
       const selectedDate = getDateWithoutTime(new Date(selectedFilterDate));
       return createDate.getTime() === selectedDate.getTime();
     }
