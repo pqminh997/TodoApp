@@ -1,45 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {createSlice, configureStore, PayloadAction} from '@reduxjs/toolkit';
-import {IconType} from '../Utils/Types';
-import {pushLocalNotificationSchedule} from '../Utils/NotiServices';
-
-export interface TodoItem {
-  id: string;
-  title: string;
-  desc: string;
-  createDate: number;
-  expireDate: string;
-  isSelected: boolean;
-  icon: IconType;
-}
-
-export interface TodoState {
-  todos: TodoItem[];
-}
-
-const TODOS_KEY = 'todos';
-
-export const loadTodos = async (): Promise<TodoItem[]> => {
-  try {
-    const todosJson = await AsyncStorage.getItem(TODOS_KEY);
-    if (todosJson) {
-      return JSON.parse(todosJson);
-    }
-    return [];
-  } catch (error) {
-    console.error('Failed to load todos from storage', error);
-    return [];
-  }
-};
-
-export const saveTodos = async (todos: TodoItem[]) => {
-  try {
-    const todosJson = JSON.stringify(todos);
-    await AsyncStorage.setItem(TODOS_KEY, todosJson);
-  } catch (error) {
-    console.error('Failed to save todos to storage', error);
-  }
-};
+import {TodoItem, TodoState} from '../Utils/Types';
+import {pushLocalNoti} from '../Utils/NotiServices';
+import {saveTodos} from '../Utils/Util';
 
 const initialState: TodoState = {
   todos: [],
@@ -53,44 +15,33 @@ const todoSlice = createSlice({
       state.todos = action.payload;
     },
     addTodo: (state, action: PayloadAction<TodoItem>) => {
+      const {expireDate, title} = action.payload;
       state.todos.push(action.payload);
       saveTodos(state.todos);
-
-      const expiryDate = new Date(action.payload.expireDate).getTime();
-      const currentDate = Date.now();
-      if (expiryDate > currentDate) {
-        const time = expiryDate - currentDate;
-        pushLocalNotificationSchedule(time, action.payload.title);
+      if (expireDate) {
+        pushLocalNoti(expireDate, title);
       }
-      console.log('todos>', state.todos);
     },
     deleteTodo: (state, action: PayloadAction<TodoItem>) => {
       state.todos = state.todos.filter(todo => todo.id !== action.payload.id);
       saveTodos(state.todos);
     },
     editTodo: (state, action: PayloadAction<TodoItem>) => {
-      const {id, title, desc, expireDate, icon} = action.payload;
+      const {id, title, desc, expireDate, icon, isDone} = action.payload;
       const todo = state.todos.find(item => item.id === id);
       if (todo) {
         todo.title = title;
         todo.desc = desc;
         todo.expireDate = expireDate;
         todo.icon = icon;
-      }
-      saveTodos(state.todos);
-    },
-    markAsCompleteTodo: (state, action: PayloadAction<TodoItem>) => {
-      const todo = state.todos.find(item => item.id === action.payload.id);
-      if (todo) {
-        todo.isSelected = !todo.isSelected;
+        todo.isDone = isDone;
       }
       saveTodos(state.todos);
     },
   },
 });
 
-export const {addTodo, markAsCompleteTodo, deleteTodo, editTodo, setTodos} =
-  todoSlice.actions;
+export const {addTodo, deleteTodo, editTodo, setTodos} = todoSlice.actions;
 
 const store = configureStore({
   reducer: todoSlice.reducer,

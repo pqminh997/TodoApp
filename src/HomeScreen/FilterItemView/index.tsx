@@ -1,28 +1,13 @@
-import React, {useState} from 'react';
-import {
-  Text,
-  View,
-  StyleSheet,
-  Image,
-  FlatList,
-  Dimensions,
-  TouchableOpacity,
-  Pressable,
-} from 'react-native';
-import {IconType} from '../../Utils/Types';
-import { convertText } from '../../Utils/Util';
+import React from 'react';
+import {Text, View, StyleSheet, Image, FlatList, Pressable} from 'react-native';
+import {ColorItem} from '../../Utils/Types';
+import {convertText} from '../../Utils/Util';
 
 const iconRedStar = require('../../Assets/images/icon_red.png');
-const iconGreenStar = require('../../Assets/images/icon_green.png');
 const iconOrangeStar = require('../../Assets/images/icon_orange.png');
 const iconYellowStar = require('../../Assets/images/icon_yellow.png');
 const iconStar = require('../../Assets/images/icon_star.png');
 const iconAll = require('../../Assets/images/icon_all.png');
-
-export interface ColorItem {
-  name: IconType;
-  image: any;
-}
 
 const colors: ColorItem[] = [
   {name: 'all', image: iconAll},
@@ -51,7 +36,6 @@ const FilterItemView = ({
                 item={item}
                 index={index}
                 onPress={onPressItem}
-                isFilterType={isFilterType}
               />
             );
           } else {
@@ -75,7 +59,6 @@ const ColorItemComponent = ({
   index: number;
   onPress: (item: ColorItem) => void;
 }) => {
-
   return (
     <Pressable
       style={[
