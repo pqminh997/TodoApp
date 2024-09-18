@@ -99,6 +99,7 @@ const HomeScreen = () => {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   };
 
+  // filter todo by date
   const isMatchDate = (item: TodoItem) => {
     if (selectedFilterDate && item.expireDate) {
       const expireDate = getDateWithoutTime(new Date(item.expireDate));
@@ -110,6 +111,7 @@ const HomeScreen = () => {
     return true;
   };
 
+  // change sort mode
   const cycleSortMode = () => {
     if (sortMode === 'default') {
       setSortMode(() => {
@@ -129,6 +131,7 @@ const HomeScreen = () => {
     }
   };
 
+  // sort todo by priority
   const handleSort = (sort: SortMode) => {
     let tempData: TodoItem[] = [];
     const iconPriority = {
@@ -208,6 +211,7 @@ const HomeScreen = () => {
             <FlatList
               data={todoData}
               renderItem={({item}) => {
+                // filter todo by date and priority
                 if (
                   (item.icon === filter || filter === 'all') &&
                   isMatchDate(item)
@@ -227,7 +231,8 @@ const HomeScreen = () => {
             <TouchableOpacity style={styles.addView} onPress={showAddTodoView}>
               <Image source={iconAdd} style={{width: 24, height: 24}} />
             </TouchableOpacity>
-
+            {/* // MARK: add todo view
+             */}
             <InputAccessoryView>
               {isShowAddTodoView && (
                 <AddTodoView
@@ -249,6 +254,8 @@ const HomeScreen = () => {
           </View>
         </TouchableWithoutFeedback>
       </SafeAreaView>
+      {/* // MARK: black theme
+       */}
       {(isShowAddTodoView || isShowFilterDate) && (
         <View style={styles.blackTheme}>
           <TouchableWithoutFeedback
@@ -261,7 +268,8 @@ const HomeScreen = () => {
         </View>
       )}
 
-      {/* // MARK:  calendar*/}
+      {/* // MARK: calendar
+       */}
       {isShowFilterDate && (
         <View style={[styles.calendarView, {top: insets.top + 40}]}>
           <Calendar

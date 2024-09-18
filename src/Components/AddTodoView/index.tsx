@@ -101,6 +101,7 @@ const AddTodoView = ({
     );
   };
 
+  // fill data
   useEffect(() => {
     if (currentItem) {
       currentItem.expireDate && setIsShowDueTime(true);
@@ -109,6 +110,7 @@ const AddTodoView = ({
     }
   }, [currentItem]);
 
+  // focus title and show keyboard
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -143,7 +145,8 @@ const AddTodoView = ({
             autoComplete={'off'}
             placeholderTextColor={'gray'}
           />
-
+          {/* // MARK: date time picker
+           */}
           {isShowDueTime && (
             <View style={styles.dueTime}>
               <Text style={{fontSize: 18}}>{`Due time: `}</Text>
@@ -170,7 +173,8 @@ const AddTodoView = ({
             </View>
           )}
         </View>
-
+        {/* // MARK: menu icon
+         */}
         <View style={styles.bottomContainer}>
           <TouchableOpacity
             hitSlop={{right: 10}}
