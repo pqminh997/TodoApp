@@ -98,7 +98,7 @@ const HomeScreen = () => {
   // filter todo by date
   const isMatchDate = (item: TodoItem) => {
     if (selectedFilterDate && item.expireDate) {
-      const expireDate = getDateWithoutTime(new Date(item.expireDate));
+      const expireDate = getDateWithoutTime(new Date(Number(item.expireDate)));
       const selectedDate = getDateWithoutTime(new Date(selectedFilterDate));
       return expireDate.getTime() === selectedDate.getTime();
     } else if (selectedFilterDate && !item.expireDate) {

@@ -7,7 +7,9 @@
     "ios": "npx react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start --reset-cache",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "test-home": "jest __tests__/HomeScreen.test.tsx --watch",
+    "test-app": "jest __tests__/App.test.tsx --watch"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.0.0",
