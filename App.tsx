@@ -6,7 +6,6 @@
  */
 
 import React, {useEffect} from 'react';
-import AppStack from './src/Navigations/AppStack';
 import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {Provider} from 'react-redux';
@@ -14,6 +13,7 @@ import store, {setTodos} from './src/Store';
 import {useAppDispatch} from './src/Store/hook';
 import {configNoti} from './src/Utils/NotiServices';
 import {loadTodos} from './src/Utils/Util';
+import AppStack from './src/Navigations/AppStack';
 
 const App = () => {
   return (

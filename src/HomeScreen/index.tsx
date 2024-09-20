@@ -71,10 +71,6 @@ const HomeScreen = () => {
     setIsShowAddTodoView(true);
   };
 
-  const handleButtonPress = () => {
-    setShowFilterView(!showFilterView);
-  };
-
   const handlePressOutside = () => {
     setShowFilterView(false);
   };
@@ -172,7 +168,7 @@ const HomeScreen = () => {
                       event.nativeEvent.layout.height,
                   )
                 }
-                onPress={handleButtonPress}
+                onPress={() => setShowFilterView(!showFilterView)}
                 style={{flexDirection: 'row'}}
                 hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={{fontSize: 16, fontWeight: '500'}}>

@@ -17,4 +17,24 @@ jest.mock('../src/Utils/Util', () => ({
 
 jest.mock('../src/Utils/NotiServices', () => ({
   pushLocalNoti: jest.fn(),
+  configNoti: jest.fn(),
+}));
+
+jest.mock('@react-navigation/stack', () => ({
+  createStackNavigator: jest.fn(),
+}));
+
+jest.mock('../src/Store/hook', () => ({
+  useAppDispatch: jest.fn(),
+  useAppSelector: jest.fn(),
+}));
+
+jest.mock('react-native-safe-area-context', () => ({
+  SafeAreaProvider: ({children}: {children: any}) => children,
+  useSafeAreaInsets: () => ({top: 0, bottom: 0, left: 0, right: 0}),
+  SafeAreaView: ({children}: {children: any}) => children,
+}));
+
+jest.mock('react-redux', () => ({
+  Provider: ({children}: {children: any}) => children,
 }));
